@@ -7,22 +7,24 @@ import { BrowserModule } from '@angular/platform-browser';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { PageNotFoundComponent } from './components/page-not-found/page-not-found.component';
-import { DefaultLayoutComponent } from './layouts/default-layout/default-layout.component';
+import { LayoutsModule } from './layouts/layouts.module';
+import {TuiBlockStatusModule} from "@taiga-ui/layout";
 
 @NgModule({
   declarations: [
     AppComponent,
     PageNotFoundComponent,
-    DefaultLayoutComponent,
   ],
-  imports: [
-    BrowserModule,
-    AppRoutingModule,
-    BrowserAnimationsModule,
-    TuiRootModule,
-    TuiDialogModule,
-    TuiAlertModule,
-],
+    imports: [
+        BrowserModule,
+        AppRoutingModule,
+        BrowserAnimationsModule,
+        TuiRootModule,
+        TuiDialogModule,
+        TuiAlertModule,
+        LayoutsModule,
+        TuiBlockStatusModule,
+    ],
   providers: [{provide: TUI_SANITIZER, useClass: NgDompurifySanitizer}],
   bootstrap: [AppComponent]
 })
