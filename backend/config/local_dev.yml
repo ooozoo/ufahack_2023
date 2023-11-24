@@ -1,0 +1,10 @@
+env: local
+server:
+  address: localhost
+  port: 8080
+database:
+  host: localhost
+  port: 5432
+  name: ufahack
+  user: ufahack
+  password: ufahacksecret
