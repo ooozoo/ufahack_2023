@@ -42,6 +42,16 @@ func New(databaseConfig config.DatabaseConfig) (*Storage, error) {
 	return &Storage{db: db}, nil
 }
 
+func (s *Storage) Close() error {
+	const op = "storage.postgres.Storage.Close"
+
+	if err := s.db.Close(); err != nil {
+		return fmt.Errorf("%s: %w", op, err)
+	}
+
+	return nil
+}
+
 func (s *Storage) SaveUser(ctx context.Context, username string, passHash []byte) (domain.ID, error) {
 	const op = "storage.postgres.Storage.SaveUser"
 
@@ -73,6 +83,9 @@ func (s *Storage) GetUserByUsername(ctx context.Context, username string) (*doma
 
 	var user models.User
 	if err := stmt.GetContext(ctx, &user, username); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, fmt.Errorf("%s: %w", op, storage.ErrNotFound)
+		}
 		return nil, fmt.Errorf("%s: %w", op, err)
 	}
 

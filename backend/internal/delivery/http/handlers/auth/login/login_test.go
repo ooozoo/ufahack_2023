@@ -1,4 +1,4 @@
-package register
+package login
 
 import (
 	"bytes"
@@ -12,11 +12,12 @@ import (
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 
-	"ufahack_2023/internal/delivery/http/auth/register/mocks"
+	"ufahack_2023/internal/delivery/http/handlers/auth/login/mocks"
+	"ufahack_2023/internal/domain"
 	"ufahack_2023/internal/lib/logger/handlers/slogdiscard"
 )
 
-func TestRegisterHandler(t *testing.T) {
+func TestLoginHandler(t *testing.T) {
 	cases := []struct {
 		name       string
 		username   string
@@ -29,7 +30,7 @@ func TestRegisterHandler(t *testing.T) {
 			name:       "Success",
 			username:   "admin",
 			password:   "admin",
-			statusCode: http.StatusCreated,
+			statusCode: http.StatusOK,
 		},
 		{
 			name:       "Empty username",
@@ -53,20 +54,20 @@ func TestRegisterHandler(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 
-			userRegisterMock := mocks.NewUserRegister(t)
+			userLoginer := mocks.NewUserLoginer(t)
 
 			if len(tc.respErrors) == 0 || tc.mockError != nil {
-				userRegisterMock.
-					On("Register", mock.Anything, tc.username, tc.password).
-					Return(uuid.Nil, tc.mockError).
+				userLoginer.
+					On("Login", mock.Anything, tc.username, tc.password).
+					Return(&domain.User{ID: uuid.Nil}, "", tc.mockError).
 					Once()
 			}
 
-			handler := New(slogdiscard.NewDiscardLogger(), userRegisterMock)
+			handler := New(slogdiscard.NewDiscardLogger(), userLoginer)
 
 			input := fmt.Sprintf(`{"username": "%s", "password": "%s"}`, tc.username, tc.password)
 
-			req, err := http.NewRequest(http.MethodPost, "/register", bytes.NewReader([]byte(input)))
+			req, err := http.NewRequest(http.MethodPost, "/login", bytes.NewReader([]byte(input)))
 			require.NoError(t, err)
 
 			rr := httptest.NewRecorder()

@@ -6,13 +6,16 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"time"
 
 	"github.com/ilyakaznacheev/cleanenv"
 )
 
 type ServerConfig struct {
-	Address string `yaml:"address" env:"SERVER_ADDRESS" env-default:"localhost"`
-	Port    string `yaml:"port" env:"SERVER_PORT" env-default:"8080"`
+	Address     string        `yaml:"address" env:"SERVER_ADDRESS" env-default:"localhost"`
+	Port        int           `yaml:"port" env:"SERVER_PORT" env-default:"8080"`
+	Timeout     time.Duration `yaml:"timeout" env:"SERVER_TIMEOUT" env-default:"30m"`
+	IdleTimeout time.Duration `yaml:"idle_timeout" env:"SERVER_IDLE_TIMEOUT" env-default:"30m"`
 }
 
 type DatabaseConfig struct {
@@ -20,11 +23,17 @@ type DatabaseConfig struct {
 	Port     int    `yaml:"port" env:"DB_PORT" env-default:"5432"`
 	Name     string `yaml:"name" env:"DB_NAME" env-default:"postgres"`
 	User     string `yaml:"user" env:"DB_USER" env-default:"user"`
-	Password string `yaml:"password" env:"DB_PASSWORD" env-default:"secretpass"`
+	Password string `yaml:"password" env:"DB_PASSWORD"`
+}
+
+type JWTConfig struct {
+	Secret string        `yaml:"secret" env:"JWT_SECRET"`
+	TTL    time.Duration `yaml:"ttl" env:"JWT_TTL" env-default:"30m"`
 }
 
 type Config struct {
 	Env      string         `yaml:"env" env:"ENV" env-default:"local"`
+	JWT      JWTConfig      `yaml:"JWT"`
 	Server   ServerConfig   `yaml:"server"`
 	Database DatabaseConfig `yaml:"database"`
 }

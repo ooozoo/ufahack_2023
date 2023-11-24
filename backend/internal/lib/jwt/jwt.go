@@ -9,7 +9,7 @@ import (
 )
 
 func NewToken(user *domain.User, secret string, duration time.Duration) (string, error) {
-	token := jwt.New(jwt.SigningMethodEdDSA)
+	token := jwt.New(jwt.SigningMethodHS512)
 
 	claims := token.Claims.(jwt.MapClaims)
 	claims["uid"] = user.ID

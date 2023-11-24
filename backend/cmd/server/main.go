@@ -1,11 +1,25 @@
 package main
 
 import (
+	"context"
+	"errors"
+	"fmt"
 	"log/slog"
+	"net/http"
 	"os"
+	"os/signal"
+	"syscall"
+	"time"
+
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
 
 	"ufahack_2023/internal/config"
+	"ufahack_2023/internal/delivery/http/handlers/auth/login"
+	"ufahack_2023/internal/delivery/http/handlers/auth/register"
+	mwLogger "ufahack_2023/internal/delivery/http/middleware/logger"
 	"ufahack_2023/internal/lib/logger/sl"
+	"ufahack_2023/internal/service/auth"
 	"ufahack_2023/internal/storage/postgres"
 )
 
@@ -20,7 +34,7 @@ func main() {
 
 	log := setupLogger(cfg.Env)
 
-	log.Info("starting server",
+	log.Info("starting ufahack",
 		slog.String("env", cfg.Env),
 		slog.String("version", "v0.0.1"),
 	)
@@ -33,7 +47,64 @@ func main() {
 		os.Exit(1)
 	}
 
-	_ = storage
+	authService := auth.New(log, storage, storage, cfg.JWT.Secret, cfg.JWT.TTL)
+
+	router := chi.NewRouter()
+
+	router.Use(middleware.RequestID)
+	//router.Use(middleware.Logger)
+	router.Use(mwLogger.New(log))
+	router.Use(middleware.Recoverer)
+	router.Use(middleware.URLFormat)
+
+	router.Post("/login", login.New(log, authService))
+	router.Post("/register", register.New(log, authService))
+
+	log.Info(
+		"starting server",
+		slog.String("address", cfg.Server.Address),
+		slog.Int("port", cfg.Server.Port),
+	)
+
+	done := make(chan os.Signal, 1)
+	signal.Notify(done, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
+
+	addr := fmt.Sprintf("%s:%d", cfg.Server.Address, cfg.Server.Port)
+	srv := &http.Server{
+		Addr:         addr,
+		Handler:      router,
+		ReadTimeout:  cfg.Server.Timeout,
+		WriteTimeout: cfg.Server.Timeout,
+		IdleTimeout:  cfg.Server.IdleTimeout,
+	}
+
+	go func() {
+		if err := srv.ListenAndServe(); err != nil {
+			if !errors.Is(err, http.ErrServerClosed) {
+				log.Error("failed to start server")
+			}
+		}
+	}()
+
+	log.Info("server started")
+
+	<-done
+	log.Info("stopping server")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	if err := srv.Shutdown(ctx); err != nil {
+		log.Error("failed to stop server", sl.Err(err))
+		return
+	}
+
+	if err := storage.Close(); err != nil {
+		log.Error("failed to close storage", sl.Err(err))
+		return
+	}
+
+	log.Info("server stopped")
 }
 
 func setupLogger(env string) *slog.Logger {

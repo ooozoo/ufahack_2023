@@ -123,7 +123,7 @@ func (a *Auth) Login(
 	}
 
 	if err := bcrypt.CompareHashAndPassword(user.PasswordHash, []byte(pass)); err != nil {
-		a.log.Info("invalid credentials", sl.Err(err))
+		a.log.Warn("invalid credentials", sl.Err(err))
 
 		return nil, "", fmt.Errorf("%s: %w", op, ErrInvalidCredentials)
 	}

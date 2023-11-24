@@ -4,6 +4,7 @@ package mocks
 
 import (
 	context "context"
+
 	domain "ufahack_2023/internal/domain"
 
 	mock "github.com/stretchr/testify/mock"

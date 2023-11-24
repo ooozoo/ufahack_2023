@@ -1,4 +1,4 @@
-package login
+package register
 
 import (
 	"context"
@@ -16,7 +16,7 @@ import (
 	"ufahack_2023/internal/domain"
 	resp "ufahack_2023/internal/lib/api/response"
 	"ufahack_2023/internal/lib/logger/sl"
-	"ufahack_2023/internal/service/auth"
+	"ufahack_2023/internal/storage"
 )
 
 type Request struct {
@@ -26,15 +26,15 @@ type Request struct {
 
 type Response struct {
 	resp.Response
-	Token string `json:"token"`
+	UserID domain.ID `json:"user_id"`
 }
 
-//go:generate go run github.com/vektra/mockery/v2@v2.28.2 --name=UserLoginer
-type UserLoginer interface {
-	Login(ctx context.Context, username string, password string) (*domain.User, string, error)
+//go:generate go run github.com/vektra/mockery/v2@v2.28.2 --name=UserRegister
+type UserRegister interface {
+	Register(ctx context.Context, username string, password string) (domain.ID, error)
 }
 
-func New(log *slog.Logger, loginer UserLoginer) http.HandlerFunc {
+func New(log *slog.Logger, register UserRegister) http.HandlerFunc {
 	v := validator.New()
 	v.RegisterTagNameFunc(func(fld reflect.StructField) string {
 		name := strings.SplitN(fld.Tag.Get("json"), ",", 2)[0]
@@ -45,7 +45,7 @@ func New(log *slog.Logger, loginer UserLoginer) http.HandlerFunc {
 	})
 
 	return func(w http.ResponseWriter, r *http.Request) {
-		const op = "delivery.http.auth.login.New"
+		const op = "delivery.http.auth.register.New"
 
 		log := log.With(
 			sl.Op(op),
@@ -55,9 +55,10 @@ func New(log *slog.Logger, loginer UserLoginer) http.HandlerFunc {
 		var req Request
 
 		err := render.DecodeJSON(r.Body, &req)
+
 		if err != nil {
 			if errors.Is(err, io.EOF) {
-				log.Error("request body is empty")
+				log.Warn("request body is empty")
 
 				render.Status(r, http.StatusBadRequest)
 				render.JSON(w, r, resp.Error("empty request"))
@@ -87,31 +88,31 @@ func New(log *slog.Logger, loginer UserLoginer) http.HandlerFunc {
 			return
 		}
 
-		user, token, err := loginer.Login(r.Context(), req.Username, req.Password)
+		uid, err := register.Register(r.Context(), req.Username, req.Password)
 		if err != nil {
-			if errors.Is(err, auth.ErrInvalidCredentials) {
-				log.Error("invalid username or password")
+			if errors.Is(err, storage.ErrAlreadyExists) {
+				log.Warn("user already exists", slog.String("username", req.Username))
 
-				render.Status(r, http.StatusUnauthorized)
-				render.JSON(w, r, resp.Error("invalid username or password"))
+				render.Status(r, http.StatusBadRequest)
+				render.JSON(w, r, resp.Error("user already exists"))
 
 				return
 			}
 
-			log.Error("failed to login user", sl.Err(err))
+			log.Error("failed to register user", sl.Err(err))
 
 			render.Status(r, http.StatusInternalServerError)
-			render.JSON(w, r, resp.Error("failed to login"))
+			render.JSON(w, r, resp.Error("failed to register user"))
 
 			return
 		}
 
-		log.Info("user successfully logged in", slog.String("id", user.ID.String()))
+		log.Info("registered user", slog.String("id", uid.String()))
 
-		render.Status(r, http.StatusOK)
+		render.Status(r, http.StatusCreated)
 		render.JSON(w, r, Response{
 			Response: resp.OK(),
-			Token:    token,
+			UserID:   uid,
 		})
 	}
 }
