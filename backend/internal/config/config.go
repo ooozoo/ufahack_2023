@@ -1,6 +1,13 @@
 package config
 
-import "github.com/ilyakaznacheev/cleanenv"
+import (
+	"errors"
+	"flag"
+	"fmt"
+	"github.com/ilyakaznacheev/cleanenv"
+	"log"
+	"os"
+)
 
 type ServerConfig struct {
 	Address string `yaml:"address" env:"SERVER_ADDRESS" env-default:"localhost"`
@@ -16,21 +23,58 @@ type DatabaseConfig struct {
 }
 
 type Config struct {
+	Env      string         `yaml:"env" env:"ENV" env-default:"local"`
 	Server   ServerConfig   `yaml:"server"`
 	Database DatabaseConfig `yaml:"database"`
 }
 
-func Load(configPath string) (*Config, error) {
-	cfg := &Config{}
-
-	err := cleanenv.ReadConfig(configPath, cfg)
-	if err != nil {
-		return nil, err
+func Load() (*Config, error) {
+	configPath := fetchConfigPath()
+	if configPath == "" {
+		return nil, errors.New("config path is empty")
 	}
 
-	return cfg, nil
+	if _, err := os.Stat(configPath); os.IsNotExist(err) {
+		return nil, fmt.Errorf("config file does not exists: %s", configPath)
+	}
+
+	var cfg Config
+
+	if err := cleanenv.ReadConfig(configPath, &cfg); err != nil {
+		return nil, fmt.Errorf("failed to read config file: %w", err)
+	}
+
+	return &cfg, nil
 }
 
-func Description() (string, error) {
-	return cleanenv.GetDescription(&Config{}, nil)
+func MustLoad() *Config {
+	cfg, err := Load()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return cfg
+}
+
+func fetchConfigPath() string {
+	var res string
+
+	f := flag.NewFlagSet("Configuration", flag.ExitOnError)
+	f.StringVar(&res, "config", "", "Path to config file")
+
+	fu := f.Usage
+	f.Usage = func() {
+		fu()
+		envHelp, _ := cleanenv.GetDescription(&Config{}, nil)
+		fmt.Fprintln(f.Output())
+		fmt.Fprintln(f.Output(), envHelp)
+	}
+
+	f.Parse(os.Args[1:])
+
+	if res == "" {
+		res = os.Getenv("CONFIG_PATH")
+	}
+
+	return res
 }
