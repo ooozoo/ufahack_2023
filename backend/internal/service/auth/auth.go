@@ -29,7 +29,7 @@ type UserSaver interface {
 }
 
 type UserProvider interface {
-	GetUser(
+	GetUserByUsername(
 		ctx context.Context,
 		username string,
 	) (*domain.User, error)
@@ -109,7 +109,7 @@ func (a *Auth) Login(
 
 	log.Info("attempting to login user")
 
-	user, err := a.userProvider.GetUser(ctx, username)
+	user, err := a.userProvider.GetUserByUsername(ctx, username)
 	if err != nil {
 		if errors.Is(err, storage.ErrNotFound) {
 			a.log.Warn("user not found", sl.Err(err))
