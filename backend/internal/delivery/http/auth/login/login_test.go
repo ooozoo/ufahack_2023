@@ -8,10 +8,12 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 
 	"ufahack_2023/internal/delivery/http/auth/login/mocks"
+	"ufahack_2023/internal/domain"
 	"ufahack_2023/internal/lib/logger/handlers/slogdiscard"
 )
 
@@ -57,7 +59,7 @@ func TestLoginHandler(t *testing.T) {
 			if len(tc.respErrors) == 0 || tc.mockError != nil {
 				userLoginer.
 					On("Login", mock.Anything, tc.username, tc.password).
-					Return("", tc.mockError).
+					Return(&domain.User{ID: uuid.Nil}, "", tc.mockError).
 					Once()
 			}
 

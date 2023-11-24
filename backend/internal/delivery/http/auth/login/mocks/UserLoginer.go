@@ -4,6 +4,7 @@ package mocks
 
 import (
 	context "context"
+	domain "ufahack_2023/internal/domain"
 
 	mock "github.com/stretchr/testify/mock"
 )
@@ -14,27 +15,36 @@ type UserLoginer struct {
 }
 
 // Login provides a mock function with given fields: ctx, username, password
-func (_m *UserLoginer) Login(ctx context.Context, username string, password string) (string, error) {
+func (_m *UserLoginer) Login(ctx context.Context, username string, password string) (*domain.User, string, error) {
 	ret := _m.Called(ctx, username, password)
 
-	var r0 string
-	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, string, string) (string, error)); ok {
+	var r0 *domain.User
+	var r1 string
+	var r2 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, string) (*domain.User, string, error)); ok {
 		return rf(ctx, username, password)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, string, string) string); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, string, string) *domain.User); ok {
 		r0 = rf(ctx, username, password)
 	} else {
-		r0 = ret.Get(0).(string)
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*domain.User)
+		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, string, string) error); ok {
+	if rf, ok := ret.Get(1).(func(context.Context, string, string) string); ok {
 		r1 = rf(ctx, username, password)
 	} else {
-		r1 = ret.Error(1)
+		r1 = ret.Get(1).(string)
 	}
 
-	return r0, r1
+	if rf, ok := ret.Get(2).(func(context.Context, string, string) error); ok {
+		r2 = rf(ctx, username, password)
+	} else {
+		r2 = ret.Error(2)
+	}
+
+	return r0, r1, r2
 }
 
 type mockConstructorTestingTNewUserLoginer interface {

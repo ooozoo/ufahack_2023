@@ -99,7 +99,7 @@ func (a *Auth) Login(
 	ctx context.Context,
 	username string,
 	pass string,
-) (string, error) {
+) (*domain.User, string, error) {
 	const op = "service.auth.Auth.Login"
 
 	log := a.log.With(
@@ -114,18 +114,18 @@ func (a *Auth) Login(
 		if errors.Is(err, storage.ErrNotFound) {
 			a.log.Warn("user not found", sl.Err(err))
 
-			return "", fmt.Errorf("%s: %w", op, ErrInvalidCredentials)
+			return nil, "", fmt.Errorf("%s: %w", op, ErrInvalidCredentials)
 		}
 
 		a.log.Error("failed to get user", sl.Err(err))
 
-		return "", fmt.Errorf("%s: %w", op, err)
+		return nil, "", fmt.Errorf("%s: %w", op, err)
 	}
 
 	if err := bcrypt.CompareHashAndPassword(user.PasswordHash, []byte(pass)); err != nil {
 		a.log.Info("invalid credentials", sl.Err(err))
 
-		return "", fmt.Errorf("%s: %w", op, ErrInvalidCredentials)
+		return nil, "", fmt.Errorf("%s: %w", op, ErrInvalidCredentials)
 	}
 
 	log.Info("user logged in successfully")
@@ -134,10 +134,10 @@ func (a *Auth) Login(
 	if err != nil {
 		a.log.Error("failed to generate token", sl.Err(err))
 
-		return "", fmt.Errorf("%s: %w", op, err)
+		return nil, "", fmt.Errorf("%s: %w", op, err)
 	}
 
-	return token, nil
+	return user, token, nil
 }
 
 func (a *Auth) IsAdmin(ctx context.Context, userID domain.ID) (bool, error) {

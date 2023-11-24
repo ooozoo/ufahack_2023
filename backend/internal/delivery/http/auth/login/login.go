@@ -13,6 +13,7 @@ import (
 	"github.com/go-chi/render"
 	"github.com/go-playground/validator/v10"
 
+	"ufahack_2023/internal/domain"
 	resp "ufahack_2023/internal/lib/api/response"
 	"ufahack_2023/internal/lib/logger/sl"
 	"ufahack_2023/internal/service/auth"
@@ -30,7 +31,7 @@ type Response struct {
 
 //go:generate go run github.com/vektra/mockery/v2@v2.28.2 --name=UserLoginer
 type UserLoginer interface {
-	Login(ctx context.Context, username string, password string) (string, error)
+	Login(ctx context.Context, username string, password string) (*domain.User, string, error)
 }
 
 func New(log *slog.Logger, loginer UserLoginer) http.HandlerFunc {
@@ -86,7 +87,7 @@ func New(log *slog.Logger, loginer UserLoginer) http.HandlerFunc {
 			return
 		}
 
-		token, err := loginer.Login(r.Context(), req.Username, req.Password)
+		user, token, err := loginer.Login(r.Context(), req.Username, req.Password)
 		if err != nil {
 			if errors.Is(err, auth.ErrInvalidCredentials) {
 				log.Error("invalid username or password")
@@ -104,6 +105,8 @@ func New(log *slog.Logger, loginer UserLoginer) http.HandlerFunc {
 
 			return
 		}
+
+		log.Info("user successfully logged in", slog.String("id", user.ID.String()))
 
 		render.Status(r, http.StatusOK)
 		render.JSON(w, r, Response{
