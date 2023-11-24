@@ -1,4 +1,4 @@
-create table users
+create table if not exists users
 (
     users_uid  uuid                    not null
         constraint users_pk
@@ -13,7 +13,7 @@ create table users
     is_deleted boolean   default false not null
 );
 
-create table subjects
+create table if not exists subjects
 (
     subjects_uid uuid                    not null
         constraint subjects_pk
@@ -38,7 +38,7 @@ create table topics
     is_deleted  boolean   default false not null
 );
 
-create table questions
+create table if not exists questions
 (
     questions_uid uuid                    not null
         constraint questions_pk
@@ -52,7 +52,7 @@ create table questions
     is_deleted    boolean   default false not null
 );
 
-create table answers
+create table if not exists answers
 (
     answers_uid  uuid                    not null
         constraint answers_pk
@@ -67,7 +67,7 @@ create table answers
     is_deleted   boolean   default false not null
 );
 
-create table attempts
+create table if not exists attempts
 (
     attempts_uid uuid                    not null
         constraint attempts_pk
@@ -84,7 +84,7 @@ create table attempts
     is_confirmed boolean   default false not null
 );
 
-create table topic_results
+create table if not exists topic_results
 (
     attempt_uid  uuid                    not null
         constraint topic_results_attempts_attempts_uid_fk
@@ -99,7 +99,7 @@ create table topic_results
     updated_at   timestamp default now() not null
 );
 
-create function update_lastup_col() returns trigger
+create or replace function update_lastup_col() returns trigger
     language plpgsql
 as
 $$
@@ -109,49 +109,49 @@ BEGIN
 END;
 $$;
 
-create trigger update_lastup
+create or replace trigger update_lastup
     before update
     on users
     for each row
 execute procedure update_lastup_col();
 
-create trigger update_lastup
+create or replace trigger update_lastup
     before update
     on subjects
     for each row
 execute procedure update_lastup_col();
 
-create trigger update_lastup
+create or replace trigger update_lastup
     before update
     on topics
     for each row
 execute procedure update_lastup_col();
 
-create trigger update_lastup
+create or replace trigger update_lastup
     before update
     on questions
     for each row
 execute procedure update_lastup_col();
 
-create trigger update_lastup
+create or replace trigger update_lastup
     before update
     on answers
     for each row
 execute procedure update_lastup_col();
 
-create trigger update_lastup
+create or replace trigger update_lastup
     before update
     on attempts
     for each row
 execute procedure update_lastup_col();
 
-create trigger update_lastup
+create or replace trigger update_lastup
     before update
     on topic_results
     for each row
 execute procedure update_lastup_col();
 
-create procedure insert_user(user_uid uuid, name character varying, password character varying)
+create or replace procedure insert_user(user_uid uuid, name character varying, password character varying)
     language plpgsql
 as
 $$
@@ -161,7 +161,7 @@ END;
 $$;
 
 
-create procedure set_admin(name character varying, admin boolean)
+create or replace procedure set_admin(name character varying, admin boolean)
     language plpgsql
 as
 $$
