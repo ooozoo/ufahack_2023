@@ -9,14 +9,15 @@ import (
 )
 
 func New(log *slog.Logger) func(next http.Handler) http.Handler {
+	const op = "http.middleware.auth.logger"
+
+	log = log.With(
+		slog.String("op", op),
+	)
+	log.Info("logger middleware enabled")
+
 	return func(next http.Handler) http.Handler {
-		log := log.With(
-			slog.String("component", "middleware/logger"),
-		)
-
-		log.Info("logger middleware enabled")
-
-		fn := func(w http.ResponseWriter, r *http.Request) {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			entry := log.With(
 				slog.String("method", r.Method),
 				slog.String("path", r.URL.Path),
@@ -35,8 +36,6 @@ func New(log *slog.Logger) func(next http.Handler) http.Handler {
 			}()
 
 			next.ServeHTTP(ww, r)
-		}
-
-		return http.HandlerFunc(fn)
+		})
 	}
 }

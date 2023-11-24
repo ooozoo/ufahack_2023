@@ -17,6 +17,7 @@ import (
 	"ufahack_2023/internal/config"
 	"ufahack_2023/internal/delivery/http/handlers/auth/login"
 	"ufahack_2023/internal/delivery/http/handlers/auth/register"
+	mwAuth "ufahack_2023/internal/delivery/http/middleware/auth"
 	mwLogger "ufahack_2023/internal/delivery/http/middleware/logger"
 	"ufahack_2023/internal/lib/logger/sl"
 	"ufahack_2023/internal/service/auth"
@@ -56,6 +57,7 @@ func main() {
 	router.Use(mwLogger.New(log))
 	router.Use(middleware.Recoverer)
 	router.Use(middleware.URLFormat)
+	router.Use(mwAuth.New(log, cfg.JWT.Secret, authService))
 
 	router.Post("/login", login.New(log, authService))
 	router.Post("/register", register.New(log, authService))
