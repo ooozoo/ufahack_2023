@@ -4,10 +4,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/google/uuid"
-	"golang.org/x/crypto/bcrypt"
 	"log/slog"
 	"time"
+
+	"github.com/google/uuid"
+	"golang.org/x/crypto/bcrypt"
+
 	"ufahack_2023/internal/domain"
 	"ufahack_2023/internal/lib/jwt"
 	"ufahack_2023/internal/lib/logger/sl"
@@ -67,10 +69,10 @@ func (a *Auth) Register(
 	username string,
 	pass string,
 ) (domain.ID, error) {
-	const op = "Auth.Register"
+	const op = "service.auth.Auth.Register"
 
 	log := a.log.With(
-		slog.String("op", op),
+		sl.Op(op),
 		slog.String("username", username),
 	)
 
@@ -98,10 +100,10 @@ func (a *Auth) Login(
 	username string,
 	pass string,
 ) (string, error) {
-	const op = "Auth.Login"
+	const op = "service.auth.Auth.Login"
 
 	log := a.log.With(
-		slog.String("op", op),
+		sl.Op(op),
 		slog.String("username", username),
 	)
 
@@ -139,10 +141,10 @@ func (a *Auth) Login(
 }
 
 func (a *Auth) IsAdmin(ctx context.Context, userID domain.ID) (bool, error) {
-	const op = "Auth.IsAdmin"
+	const op = "service.auth.Auth.IsAdmin"
 
 	log := a.log.With(
-		slog.String("op", op),
+		sl.Op(op),
 		slog.String("user_id", userID.String()),
 	)
 

@@ -3,6 +3,7 @@ package main
 import (
 	"log/slog"
 	"os"
+
 	"ufahack_2023/internal/config"
 )
 

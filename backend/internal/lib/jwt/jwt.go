@@ -1,8 +1,10 @@
 package jwt
 
 import (
-	"github.com/golang-jwt/jwt/v5"
 	"time"
+
+	"github.com/golang-jwt/jwt/v5"
+
 	"ufahack_2023/internal/domain"
 )
 
