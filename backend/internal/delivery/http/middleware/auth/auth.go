@@ -45,7 +45,7 @@ func New(
 	const op = "http.middleware.auth"
 
 	log = log.With(
-		slog.String("op", op),
+		sl.Op(op),
 	)
 	log.Info("auth middleware enabled")
 

@@ -6,13 +6,15 @@ import (
 	"time"
 
 	"github.com/go-chi/chi/v5/middleware"
+
+	"ufahack_2023/pkg/logger/sl"
 )
 
 func New(log *slog.Logger) func(next http.Handler) http.Handler {
 	const op = "http.middleware.auth.logger"
 
 	log = log.With(
-		slog.String("op", op),
+		sl.Op(op),
 	)
 	log.Info("logger middleware enabled")
 
