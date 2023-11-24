@@ -7,8 +7,6 @@ import (
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
-
-	"ufahack_2023/internal/domain"
 )
 
 var (
@@ -17,15 +15,15 @@ var (
 )
 
 type Claims struct {
-	UID domain.ID
+	UID uuid.UUID
 	Exp time.Time
 }
 
-func NewToken(user *domain.User, secret string, duration time.Duration) (string, error) {
+func NewToken(userID uuid.UUID, secret string, duration time.Duration) (string, error) {
 	token := jwt.New(jwt.SigningMethodHS512)
 
 	claims := token.Claims.(jwt.MapClaims)
-	claims["uid"] = user.ID
+	claims["uid"] = userID
 	claims["exp"] = time.Now().Add(duration).Unix()
 
 	tokenString, err := token.SignedString([]byte(secret))

@@ -14,9 +14,9 @@ import (
 	"github.com/go-playground/validator/v10"
 
 	"ufahack_2023/internal/domain"
-	resp "ufahack_2023/internal/lib/api/response"
-	"ufahack_2023/internal/lib/logger/sl"
 	"ufahack_2023/internal/service/auth"
+	resp "ufahack_2023/pkg/api/response"
+	"ufahack_2023/pkg/logger/sl"
 )
 
 type Request struct {

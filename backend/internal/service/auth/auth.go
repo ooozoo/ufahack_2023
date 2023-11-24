@@ -11,9 +11,9 @@ import (
 	"golang.org/x/crypto/bcrypt"
 
 	"ufahack_2023/internal/domain"
-	"ufahack_2023/internal/lib/jwt"
-	"ufahack_2023/internal/lib/logger/sl"
 	"ufahack_2023/internal/storage"
+	"ufahack_2023/pkg/jwt"
+	"ufahack_2023/pkg/logger/sl"
 )
 
 var (
@@ -130,7 +130,7 @@ func (a *Auth) Login(
 
 	log.Info("user logged in successfully")
 
-	token, err := jwt.NewToken(user, a.secret, a.tokenTTL)
+	token, err := jwt.NewToken(user.ID, a.secret, a.tokenTTL)
 	if err != nil {
 		a.log.Error("failed to generate token", sl.Err(err))
 

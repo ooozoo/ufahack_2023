@@ -14,7 +14,7 @@ import (
 
 	"ufahack_2023/internal/delivery/http/handlers/auth/login/mocks"
 	"ufahack_2023/internal/domain"
-	"ufahack_2023/internal/lib/logger/handlers/slogdiscard"
+	"ufahack_2023/pkg/logger/handlers/slogdiscard"
 )
 
 func TestLoginHandler(t *testing.T) {

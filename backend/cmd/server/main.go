@@ -19,9 +19,9 @@ import (
 	"ufahack_2023/internal/delivery/http/handlers/auth/register"
 	mwAuth "ufahack_2023/internal/delivery/http/middleware/auth"
 	mwLogger "ufahack_2023/internal/delivery/http/middleware/logger"
-	"ufahack_2023/internal/lib/logger/sl"
 	"ufahack_2023/internal/service/auth"
 	"ufahack_2023/internal/storage/postgres"
+	"ufahack_2023/pkg/logger/sl"
 )
 
 const (

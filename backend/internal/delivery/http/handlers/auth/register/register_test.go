@@ -13,7 +13,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"ufahack_2023/internal/delivery/http/handlers/auth/register/mocks"
-	"ufahack_2023/internal/lib/logger/handlers/slogdiscard"
+	"ufahack_2023/pkg/logger/handlers/slogdiscard"
 )
 
 func TestRegisterHandler(t *testing.T) {

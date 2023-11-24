@@ -8,8 +8,8 @@ import (
 	"strings"
 
 	"ufahack_2023/internal/domain"
-	"ufahack_2023/internal/lib/jwt"
-	"ufahack_2023/internal/lib/logger/sl"
+	"ufahack_2023/pkg/jwt"
+	"ufahack_2023/pkg/logger/sl"
 )
 
 const (
