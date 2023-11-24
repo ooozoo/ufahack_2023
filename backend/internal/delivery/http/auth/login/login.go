@@ -58,6 +58,7 @@ func New(log *slog.Logger, loginer UserLoginer) http.HandlerFunc {
 			if errors.Is(err, io.EOF) {
 				log.Error("request body is empty")
 
+				render.Status(r, http.StatusBadRequest)
 				render.JSON(w, r, resp.Error("empty request"))
 
 				return
@@ -65,6 +66,7 @@ func New(log *slog.Logger, loginer UserLoginer) http.HandlerFunc {
 
 			log.Error("failed to decode request body", sl.Err(err))
 
+			render.Status(r, http.StatusInternalServerError)
 			render.JSON(w, r, resp.Error("failed to decode request"))
 
 			return
@@ -78,6 +80,7 @@ func New(log *slog.Logger, loginer UserLoginer) http.HandlerFunc {
 
 			log.Error("invalid request", sl.Err(err))
 
+			render.Status(r, http.StatusBadRequest)
 			render.JSON(w, r, resp.ValidationError(validateErr))
 
 			return
@@ -88,6 +91,7 @@ func New(log *slog.Logger, loginer UserLoginer) http.HandlerFunc {
 			if errors.Is(err, auth.ErrInvalidCredentials) {
 				log.Error("invalid username or password")
 
+				render.Status(r, http.StatusUnauthorized)
 				render.JSON(w, r, resp.Error("invalid username or password"))
 
 				return
@@ -95,11 +99,13 @@ func New(log *slog.Logger, loginer UserLoginer) http.HandlerFunc {
 
 			log.Error("failed to login user", sl.Err(err))
 
+			render.Status(r, http.StatusInternalServerError)
 			render.JSON(w, r, resp.Error("failed to login"))
 
 			return
 		}
 
+		render.Status(r, http.StatusOK)
 		render.JSON(w, r, Response{
 			Response: resp.OK(),
 			Token:    token,

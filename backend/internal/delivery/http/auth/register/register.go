@@ -60,6 +60,7 @@ func New(log *slog.Logger, register UserRegister) http.HandlerFunc {
 			if errors.Is(err, io.EOF) {
 				log.Error("request body is empty")
 
+				render.Status(r, http.StatusBadRequest)
 				render.JSON(w, r, resp.Error("empty request"))
 
 				return
@@ -67,6 +68,7 @@ func New(log *slog.Logger, register UserRegister) http.HandlerFunc {
 
 			log.Error("failed to decode request body", sl.Err(err))
 
+			render.Status(r, http.StatusInternalServerError)
 			render.JSON(w, r, resp.Error("failed to decode request"))
 
 			return
@@ -80,6 +82,7 @@ func New(log *slog.Logger, register UserRegister) http.HandlerFunc {
 
 			log.Error("invalid request", sl.Err(err))
 
+			render.Status(r, http.StatusBadRequest)
 			render.JSON(w, r, resp.ValidationError(validateErr))
 
 			return
@@ -90,6 +93,7 @@ func New(log *slog.Logger, register UserRegister) http.HandlerFunc {
 			if errors.Is(err, storage.ErrAlreadyExists) {
 				log.Error("user already exists", slog.String("username", req.Username))
 
+				render.Status(r, http.StatusBadRequest)
 				render.JSON(w, r, resp.Error("user already exists"))
 
 				return
@@ -97,6 +101,7 @@ func New(log *slog.Logger, register UserRegister) http.HandlerFunc {
 
 			log.Error("failed to register user", sl.Err(err))
 
+			render.Status(r, http.StatusInternalServerError)
 			render.JSON(w, r, resp.Error("failed to register user"))
 
 			return
@@ -104,6 +109,7 @@ func New(log *slog.Logger, register UserRegister) http.HandlerFunc {
 
 		log.Info("registered user", slog.String("id", uid.String()))
 
+		render.Status(r, http.StatusCreated)
 		render.JSON(w, r, Response{
 			Response: resp.OK(),
 			UserID:   uid,

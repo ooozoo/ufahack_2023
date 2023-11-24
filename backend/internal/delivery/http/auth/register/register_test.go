@@ -23,23 +23,27 @@ func TestRegisterHandler(t *testing.T) {
 		password   string
 		respErrors []string
 		mockError  error
+		statusCode int
 	}{
 		{
-			name:     "Success",
-			username: "admin",
-			password: "admin",
+			name:       "Success",
+			username:   "admin",
+			password:   "admin",
+			statusCode: http.StatusCreated,
 		},
 		{
 			name:       "Empty username",
 			username:   "",
 			password:   "admin",
 			respErrors: []string{"field username is a required field"},
+			statusCode: http.StatusBadRequest,
 		},
 		{
 			name:       "Empty password",
 			username:   "admin",
 			password:   "",
 			respErrors: []string{"field password is a required field"},
+			statusCode: http.StatusBadRequest,
 		},
 	}
 
@@ -68,7 +72,7 @@ func TestRegisterHandler(t *testing.T) {
 			rr := httptest.NewRecorder()
 			handler.ServeHTTP(rr, req)
 
-			require.Equal(t, rr.Code, http.StatusOK)
+			require.Equal(t, tc.statusCode, rr.Code)
 
 			body := rr.Body.String()
 
