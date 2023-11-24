@@ -13,5 +13,5 @@ import { RouterOutlet } from '@angular/router';
     providers: [{provide: TUI_SANITIZER, useClass: NgDompurifySanitizer}]
 })
 export class AppComponent {
-  title = 'frontend';
+  title = 'EduPlay';
 }
