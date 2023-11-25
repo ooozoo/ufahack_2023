@@ -33,7 +33,7 @@ type JWTConfig struct {
 
 type Config struct {
 	Env      string         `yaml:"env" env:"ENV" env-default:"local"`
-	JWT      JWTConfig      `yaml:"JWT"`
+	JWT      JWTConfig      `yaml:"jwt"`
 	Server   ServerConfig   `yaml:"server"`
 	Database DatabaseConfig `yaml:"database"`
 }
