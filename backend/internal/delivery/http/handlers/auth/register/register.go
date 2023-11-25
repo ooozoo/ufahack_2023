@@ -3,18 +3,16 @@ package register
 import (
 	"context"
 	"errors"
-	"io"
 	"log/slog"
 	"net/http"
 
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/render"
-	"github.com/go-playground/validator/v10"
 
+	"ufahack_2023/internal/delivery/http/handlers/common"
 	"ufahack_2023/internal/domain"
 	"ufahack_2023/internal/storage"
 	resp "ufahack_2023/pkg/api/response"
-	"ufahack_2023/pkg/api/valid"
 	"ufahack_2023/pkg/logger/sl"
 )
 
@@ -34,8 +32,6 @@ type UserRegister interface {
 }
 
 func New(log *slog.Logger, register UserRegister) http.HandlerFunc {
-	v := valid.GetValidator()
-
 	return func(w http.ResponseWriter, r *http.Request) {
 		const op = "http.auth.register"
 
@@ -46,37 +42,10 @@ func New(log *slog.Logger, register UserRegister) http.HandlerFunc {
 
 		var req Request
 
-		err := render.DecodeJSON(r.Body, &req)
-
-		if err != nil {
-			if errors.Is(err, io.EOF) {
-				log.Warn("request body is empty")
-
-				render.Status(r, http.StatusBadRequest)
-				render.JSON(w, r, resp.Error("empty request"))
-
-				return
-			}
-
-			log.Error("failed to decode request body", sl.Err(err))
-
-			render.Status(r, http.StatusInternalServerError)
-			render.JSON(w, r, resp.Error("failed to decode request"))
-
+		if !common.DecodeRequest(log, w, r, &req) {
 			return
 		}
-
-		log.Debug("request body decoded")
-
-		if err := v.Struct(req); err != nil {
-			var validateErr validator.ValidationErrors
-			errors.As(err, &validateErr)
-
-			log.Error("invalid request", sl.Err(err))
-
-			render.Status(r, http.StatusBadRequest)
-			render.JSON(w, r, resp.ValidationError(validateErr))
-
+		if !common.ValidateRequest(log, w, r, req) {
 			return
 		}
 
