@@ -20,15 +20,22 @@ export class ApiService {
     return this._http.get(`${this._apiRoot}/${path}`, options);
   }
 
+  protected _getMutateRequestHeaders(): any {
+    return {
+      contentType: 'application/json',
+    };
+  }
+
   post(path: string, body: any | null): Observable<HttpResponse<object>> {
     return this._http.post(`${this._apiRoot}/${path}`, body, {
+      headers: this._getMutateRequestHeaders(),
       responseType: 'json',
       observe: 'response',
     });
   }
 
   login(username: string, password: string): Observable<HttpResponse<any>> {
-    return this.post('login/', {
+    return this.post('auth/login/', {
       'username': username,
       'password': password,
     }) as Observable<HttpResponse<any>>;
@@ -43,7 +50,7 @@ export class ApiService {
     password: string,
   ): Observable<HttpResponse<any>> {
     return this.post(
-      `register/`,
+      `auth/register/`,
       { username: username, password: password },
     ) as Observable<HttpResponse<any>>;
   }

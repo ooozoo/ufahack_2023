@@ -2,7 +2,7 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { TuiFieldErrorPipeModule, TuiInputModule, TuiInputPasswordModule } from '@taiga-ui/kit';
-import { TuiErrorModule, TuiLoaderModule } from '@taiga-ui/core';
+import {TuiButtonModule, TuiErrorModule, TuiLoaderModule} from '@taiga-ui/core';
 
 import { LoginPageComponent } from './login-page/login-page.component';
 import { RegisterPageComponent } from './register-page/register-page.component';
@@ -26,6 +26,7 @@ import { AuthService } from './services/auth.service'
     TuiErrorModule,
     ReactiveFormsModule,
     FormsModule,
+    TuiButtonModule,
   ],
   providers: [
     AuthService,

@@ -1,1 +1,62 @@
-<p>login-page works!</p>
+<app-default-layout>
+  <div class="auth">
+    <div class="auth__logo">
+      <div class="logo-item logo-item__icon"></div>
+      <label class="logo-item">
+        EdTech App
+      </label>
+    </div>
+
+    <form
+      class="auth__form form"
+      [formGroup]="form"
+      (ngSubmit)="submit()"
+    >
+      <div
+        class="form__card card"
+      >
+        <div class="help-text">
+          Для входа введите имя пользователя и пароль.
+        </div>
+        <div class="card__input-wrapper">
+          <tui-input
+            formControlName="username"
+          >
+            Имя пользователя
+            <span class="tui-required"></span>
+          </tui-input>
+          <tui-error
+            formControlName="password"
+            [error]="[] | tuiFieldError | async"
+          ></tui-error>
+        </div>
+        <div class="card__input-wrapper">
+          <tui-input-password
+            formControlName="password"
+          >
+            Пароль
+            <span class="tui-required"></span>
+          </tui-input-password>
+          <tui-error
+            formControlName="password"
+            [error]="[] | tuiFieldError | async"
+          ></tui-error>
+        </div>
+        <div class="card__btn-wrapper">
+          <div class="tui-form__button">
+            <button
+              class="tui-form__button"
+              tuiButton
+              type="submit"
+            >
+              Войти
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="form__message-box">
+        <label *ngIf="error">{{ error }}</label>
+      </div>
+    </form>
+  </div>
+</app-default-layout>
