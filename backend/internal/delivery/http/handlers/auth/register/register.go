@@ -37,7 +37,7 @@ func New(log *slog.Logger, register UserRegister) http.HandlerFunc {
 	v := valid.GetValidator()
 
 	return func(w http.ResponseWriter, r *http.Request) {
-		const op = "delivery.http.auth.register.New"
+		const op = "http.auth.register"
 
 		log := log.With(
 			sl.Op(op),

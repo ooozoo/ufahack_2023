@@ -37,7 +37,7 @@ func New(log *slog.Logger, loginer UserLoginer) http.HandlerFunc {
 	v := valid.GetValidator()
 
 	return func(w http.ResponseWriter, r *http.Request) {
-		const op = "delivery.http.auth.login.New"
+		const op = "http.auth.login"
 
 		log := log.With(
 			sl.Op(op),
