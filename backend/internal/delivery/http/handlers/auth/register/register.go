@@ -43,9 +43,6 @@ func New(log *slog.Logger, register UserRegister) http.HandlerFunc {
 		var req Request
 
 		common.DecodeRequest(log, w, r, &req)
-
-		log.Debug("request body decoded")
-
 		common.ValidateRequest(log, w, r, req)
 
 		uid, err := register.Register(r.Context(), req.Username, req.Password)

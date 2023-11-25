@@ -43,9 +43,6 @@ func New(log *slog.Logger, loginer UserLoginer) http.HandlerFunc {
 		var req Request
 
 		common.DecodeRequest(log, w, r, &req)
-
-		log.Debug("request body decoded")
-
 		common.ValidateRequest(log, w, r, req)
 
 		user, token, err := loginer.Login(r.Context(), req.Username, req.Password)
@@ -67,7 +64,7 @@ func New(log *slog.Logger, loginer UserLoginer) http.HandlerFunc {
 			return
 		}
 
-		log.Info("user successfully logged in", slog.String("id", user.ID.String()))
+		log.Debug("user successfully logged in", slog.String("id", user.ID.String()))
 
 		render.Status(r, http.StatusOK)
 		render.JSON(w, r, Response{
