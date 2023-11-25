@@ -16,7 +16,7 @@ import (
 )
 
 type Updater interface {
-	UpdateSubject(ctx context.Context, id domain.ID, Name string) (*domain.Subject, error)
+	UpdateSubject(ctx context.Context, id domain.ID, name string) (*domain.Subject, error)
 }
 
 type UpdateRequest struct {
@@ -42,8 +42,12 @@ func NewUpdateSubject(
 
 		var req UpdateRequest
 
-		common.DecodeRequest(log, w, r, &req)
-		common.ValidateRequest(log, w, r, req)
+		if !common.DecodeRequest(log, w, r, &req) {
+			return
+		}
+		if !common.ValidateRequest(log, w, r, req) {
+			return
+		}
 
 		subject, err := updater.UpdateSubject(r.Context(), req.ID, req.Name)
 		if err != nil {

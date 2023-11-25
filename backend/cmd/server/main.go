@@ -51,14 +51,13 @@ func main() {
 	authService := auth.New(log, storage, storage, cfg.JWT.Secret, cfg.JWT.TTL)
 
 	router := chi.NewRouter()
-
 	router.Use(middleware.RequestID)
 	router.Use(mwLogger.New(log))
 	router.Use(middleware.Recoverer)
-	router.Use(middleware.URLFormat)
+	router.Use(middleware.StripSlashes)
 	router.Use(mwAuth.NewAuth(log, cfg.JWT.Secret, authService))
 
-	router.Route("/auth", func(r chi.Router) {
+	router.Route("/api/auth", func(r chi.Router) {
 		r.Post("/login", login.New(log, authService))
 		r.Post("/register", register.New(log, authService))
 	})

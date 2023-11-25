@@ -42,8 +42,12 @@ func New(log *slog.Logger, loginer UserLoginer) http.HandlerFunc {
 
 		var req Request
 
-		common.DecodeRequest(log, w, r, &req)
-		common.ValidateRequest(log, w, r, req)
+		if !common.DecodeRequest(log, w, r, &req) {
+			return
+		}
+		if !common.ValidateRequest(log, w, r, req) {
+			return
+		}
 
 		user, token, err := loginer.Login(r.Context(), req.Username, req.Password)
 		if err != nil {
