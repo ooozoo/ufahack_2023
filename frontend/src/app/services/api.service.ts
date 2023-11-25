@@ -28,7 +28,7 @@ export class ApiService {
   }
 
   login(username: string, password: string): Observable<HttpResponse<any>> {
-    return this.post('login/', {
+    return this.post('auth/login/', {
       'username': username,
       'password': password,
     }) as Observable<HttpResponse<any>>;
@@ -43,7 +43,7 @@ export class ApiService {
     password: string,
   ): Observable<HttpResponse<any>> {
     return this.post(
-      `register/`,
+      `auth/register/`,
       { username: username, password: password },
     ) as Observable<HttpResponse<any>>;
   }
