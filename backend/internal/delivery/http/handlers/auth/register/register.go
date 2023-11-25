@@ -6,8 +6,6 @@ import (
 	"io"
 	"log/slog"
 	"net/http"
-	"reflect"
-	"strings"
 
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/render"
@@ -16,6 +14,7 @@ import (
 	"ufahack_2023/internal/domain"
 	"ufahack_2023/internal/storage"
 	resp "ufahack_2023/pkg/api/response"
+	"ufahack_2023/pkg/api/valid"
 	"ufahack_2023/pkg/logger/sl"
 )
 
@@ -35,14 +34,7 @@ type UserRegister interface {
 }
 
 func New(log *slog.Logger, register UserRegister) http.HandlerFunc {
-	v := validator.New()
-	v.RegisterTagNameFunc(func(fld reflect.StructField) string {
-		name := strings.SplitN(fld.Tag.Get("json"), ",", 2)[0]
-		if name == "-" {
-			return ""
-		}
-		return name
-	})
+	v := valid.GetValidator()
 
 	return func(w http.ResponseWriter, r *http.Request) {
 		const op = "delivery.http.auth.register.New"

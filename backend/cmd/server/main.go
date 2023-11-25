@@ -58,8 +58,10 @@ func main() {
 	router.Use(middleware.URLFormat)
 	router.Use(mwAuth.NewAuth(log, cfg.JWT.Secret, authService))
 
-	router.Post("/login", login.New(log, authService))
-	router.Post("/register", register.New(log, authService))
+	router.Route("/auth", func(r chi.Router) {
+		r.Post("/login", login.New(log, authService))
+		r.Post("/register", register.New(log, authService))
+	})
 
 	log.Info(
 		"starting server",
