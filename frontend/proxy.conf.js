@@ -1,5 +1,4 @@
-// const target = '<your location>';
-const target = 'http://127.0.0.1:8080';
+const target = 'http://192.168.102.97:8080';
 
 const PROXY_CONFIG = [
   {

@@ -20,8 +20,15 @@ export class ApiService {
     return this._http.get(`${this._apiRoot}/${path}`, options);
   }
 
+  protected _getMutateRequestHeaders(): any {
+    return {
+      contentType: 'application/json',
+    };
+  }
+
   post(path: string, body: any | null): Observable<HttpResponse<object>> {
     return this._http.post(`${this._apiRoot}/${path}`, body, {
+      headers: this._getMutateRequestHeaders(),
       responseType: 'json',
       observe: 'response',
     });

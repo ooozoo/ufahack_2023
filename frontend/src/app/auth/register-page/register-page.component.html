@@ -12,7 +12,6 @@
       [formGroup]="form"
       (ngSubmit)="submit()"
     >
-<!--      <tui-loader></tui-loader>-->
       <div
         class="form__card card"
       >
@@ -44,12 +43,12 @@
           ></tui-error>
         </div>
         <div class="card__btn-wrapper">
-          <div class="tui-form__buttons">
+          <div class="tui-form__button">
             <button
-              class="tui-space_right-3 tui-space_bottom-3"
+              class="tui-form__button"
+              appearance="flat"
               tuiButton
               type="submit"
-              class="tui-form__button"
             >
               Зарегистрироваться
             </button>
@@ -57,7 +56,7 @@
         </div>
       </div>
       <div class="form__message-box">
-        <label *ngIf="error">{{error}}</label>
+        <label *ngIf="error">{{ error }}</label>
       </div>
     </form>
   </div>
