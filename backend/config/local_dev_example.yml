@@ -1,5 +1,8 @@
 env: local
-secret: ufahacksecret
+
+jwt:
+  secret: ufahacksecret
+  ttl: 30m
 
 server:
   address: localhost
