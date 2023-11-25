@@ -7,7 +7,12 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/go-chi/chi/v5/middleware"
+	"github.com/go-chi/render"
+	"github.com/google/uuid"
+
 	"ufahack_2023/internal/domain"
+	resp "ufahack_2023/pkg/api/response"
 	"ufahack_2023/pkg/jwt"
 	"ufahack_2023/pkg/logger/sl"
 )
@@ -37,12 +42,12 @@ type PermissionProvider interface {
 	IsAdmin(ctx context.Context, uid domain.ID) (bool, error)
 }
 
-func New(
+func NewAuth(
 	log *slog.Logger,
 	secret string,
 	permProvider PermissionProvider,
 ) func(next http.Handler) http.Handler {
-	const op = "http.middleware.auth"
+	const op = "http.middleware.auth.Auth"
 
 	log = log.With(
 		sl.Op(op),
@@ -51,6 +56,10 @@ func New(
 
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			log = log.With(
+				slog.String("request_id", middleware.GetReqID(r.Context())),
+			)
+
 			tokenStr := extractBearerToken(r)
 			if tokenStr == "" {
 				next.ServeHTTP(w, r)
@@ -74,6 +83,7 @@ func New(
 				log.Error("failed to check if user is admin", sl.Err(err))
 
 				ctx := context.WithValue(r.Context(), authErrorKey, ErrFailedIsAdminCheck)
+				ctx = context.WithValue(ctx, uidKey, claims.UID)
 				next.ServeHTTP(w, r.WithContext(ctx))
 
 				return
@@ -86,4 +96,59 @@ func New(
 		})
 	}
 
+}
+
+func NewAdminOnly(log *slog.Logger) func(next http.Handler) http.Handler {
+	const op = "http.middleware.auth.AdminOnly"
+
+	log = log.With(
+		sl.Op(op),
+	)
+
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			log = log.With(
+				slog.String("request_id", middleware.GetReqID(r.Context())),
+			)
+
+			isAdmin, ok := r.Context().Value(isAdminKey).(bool)
+			if !ok || !isAdmin {
+				uid, ok := r.Context().Value(uidKey).(uuid.UUID)
+				if !ok {
+					log.Warn("anonymous tried to access admin endpoint")
+				} else {
+					log.Warn("user tried to access admin endpoint", slog.String("uid", uid.String()))
+				}
+				render.Status(r, http.StatusForbidden)
+				render.JSON(w, r, resp.Error("action allowed only for admins"))
+				return
+			}
+			next.ServeHTTP(w, r)
+		})
+	}
+}
+
+func NewUserOnly(log *slog.Logger) func(next http.Handler) http.Handler {
+	const op = "http.middleware.auth.UserOnly"
+
+	log = log.With(
+		sl.Op(op),
+	)
+
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			log = log.With(
+				slog.String("request_id", middleware.GetReqID(r.Context())),
+			)
+
+			uid, ok := r.Context().Value(uidKey).(uuid.UUID)
+			if !ok || uid == uuid.Nil {
+				log.Warn("anonymous tried to access user endpoints", slog.String("request_id", middleware.GetReqID(r.Context())))
+				render.Status(r, http.StatusForbidden)
+				render.JSON(w, r, resp.Error("action allowed only for users"))
+				return
+			}
+			next.ServeHTTP(w, r)
+		})
+	}
 }

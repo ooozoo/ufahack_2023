@@ -53,11 +53,10 @@ func main() {
 	router := chi.NewRouter()
 
 	router.Use(middleware.RequestID)
-	//router.Use(middleware.Logger)
 	router.Use(mwLogger.New(log))
 	router.Use(middleware.Recoverer)
 	router.Use(middleware.URLFormat)
-	router.Use(mwAuth.New(log, cfg.JWT.Secret, authService))
+	router.Use(mwAuth.NewAuth(log, cfg.JWT.Secret, authService))
 
 	router.Post("/login", login.New(log, authService))
 	router.Post("/register", register.New(log, authService))
