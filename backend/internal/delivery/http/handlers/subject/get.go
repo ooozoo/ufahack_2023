@@ -17,27 +17,27 @@ import (
 )
 
 type Provider interface {
-	GetSubjects(ctx context.Context) ([]*domain.Subject, error)
+	ListSubjects(ctx context.Context) ([]*domain.Subject, error)
 	GetSubjectByID(ctx context.Context, id domain.ID) (*domain.Subject, error)
 }
 
-type GetManyResponse struct {
+type GetListResponse struct {
 	resp.Response
 	Subjects []*Subject `json:"subject"`
 }
 
-func NewGetSubjects(
+func NewListSubjects(
 	log *slog.Logger,
 	provider Provider,
 ) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		const op = "http.subject.GetSubjects"
+		const op = "http.subject.ListSubjects"
 
 		log = log.With(
 			sl.Op(op),
 		)
 
-		subjects, err := provider.GetSubjects(r.Context())
+		subjects, err := provider.ListSubjects(r.Context())
 		if err != nil {
 			log.Error("failed to get subject", sl.Err(err))
 
@@ -50,14 +50,14 @@ func NewGetSubjects(
 		log.Debug("successfully fetched subject", slog.Any("subject", subjects))
 
 		render.Status(r, http.StatusOK)
-		render.JSON(w, r, GetManyResponse{
+		render.JSON(w, r, GetListResponse{
 			Response: resp.OK(),
 			Subjects: ToModelMany(subjects),
 		})
 	}
 }
 
-type GetOneResponse struct {
+type GetResponse struct {
 	resp.Response
 	Subject *Subject `json:"subject"`
 }
@@ -96,7 +96,7 @@ func NewGetSubject(
 		log.Debug("subject successfully fetched", slog.Any("subject", subject))
 
 		render.Status(r, http.StatusOK)
-		render.JSON(w, r, GetOneResponse{
+		render.JSON(w, r, GetResponse{
 			Response: resp.OK(),
 			Subject:  ToModelOne(subject),
 		})

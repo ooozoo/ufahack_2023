@@ -16,7 +16,7 @@ import (
 	"ufahack_2023/pkg/logger/sl"
 )
 
-func DecodeRequest(log *slog.Logger, w http.ResponseWriter, r *http.Request, req any) {
+func DecodeRequest(log *slog.Logger, w http.ResponseWriter, r *http.Request, req any) bool {
 	const op = "http.common.DecodeRequest"
 
 	log = log.With(
@@ -30,7 +30,7 @@ func DecodeRequest(log *slog.Logger, w http.ResponseWriter, r *http.Request, req
 			render.Status(r, http.StatusBadRequest)
 			render.JSON(w, r, resp.Error("empty request"))
 
-			return
+			return false
 		}
 
 		log.Error("failed to decode request body", sl.Err(err))
@@ -38,13 +38,14 @@ func DecodeRequest(log *slog.Logger, w http.ResponseWriter, r *http.Request, req
 		render.Status(r, http.StatusInternalServerError)
 		render.JSON(w, r, resp.Error("failed to decode request"))
 
-		return
+		return false
 	}
 
 	log.Debug("request body decoded")
+	return true
 }
 
-func ValidateRequest(log *slog.Logger, w http.ResponseWriter, r *http.Request, req any) {
+func ValidateRequest(log *slog.Logger, w http.ResponseWriter, r *http.Request, req any) bool {
 	const op = "http.common.ValidateRequest"
 
 	log = log.With(
@@ -62,10 +63,11 @@ func ValidateRequest(log *slog.Logger, w http.ResponseWriter, r *http.Request, r
 		render.Status(r, http.StatusBadRequest)
 		render.JSON(w, r, resp.ValidationError(validateErr))
 
-		return
+		return false
 	}
 
 	log.Debug("request validated")
+	return true
 }
 
 func ExtractUUIDParam(log *slog.Logger, w http.ResponseWriter, r *http.Request, param string) uuid.UUID {

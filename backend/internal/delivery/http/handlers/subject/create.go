@@ -41,8 +41,12 @@ func NewCreateSubject(
 
 		var req CreateRequest
 
-		common.DecodeRequest(log, w, r, &req)
-		common.ValidateRequest(log, w, r, req)
+		if !common.DecodeRequest(log, w, r, &req) {
+			return
+		}
+		if !common.ValidateRequest(log, w, r, req) {
+			return
+		}
 
 		uid, err := saver.SaveSubject(r.Context(), req.Name)
 		if err != nil {

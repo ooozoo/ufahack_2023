@@ -5,16 +5,14 @@ import (
 )
 
 type Subject struct {
-	ID        domain.ID `json:"id"`
-	Name      string    `json:"name"`
-	IsDeleted bool      `json:"is_deleted"`
+	ID   domain.ID `json:"id"`
+	Name string    `json:"name"`
 }
 
 func ToModelOne(s *domain.Subject) *Subject {
 	return &Subject{
-		ID:        s.ID,
-		Name:      s.Name,
-		IsDeleted: s.IsDeleted,
+		ID:   s.ID,
+		Name: s.Name,
 	}
 }
 
