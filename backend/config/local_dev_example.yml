@@ -1,0 +1,15 @@
+env: local
+secret: ufahacksecret
+
+server:
+  address: localhost
+  port: 8080
+  timeout: 30m
+  idle_timeout: 30m
+
+database:
+  host: localhost
+  port: 5432
+  name: ufahack
+  user: ufahack
+  password: ufahacksecret
